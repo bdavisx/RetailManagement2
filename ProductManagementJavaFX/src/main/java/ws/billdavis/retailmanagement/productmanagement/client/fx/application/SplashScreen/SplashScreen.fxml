@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane hgap="14.0" maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity"
+    vgap="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="ws.billdavis.retailmanagement.productmanagement.client.fx.application.SplashScreen.SplashScreenUI">
+
+    <stylesheets>
+        <URL value="@SplashScreen.css" />
+    </stylesheets>
+
+    <children>
+        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true"
+            GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="0" GridPane.valignment="TOP">
+            <image>
+                <Image url="@../ApplicationIcon.png" />
+            </image>
+        </ImageView>
+
+        <VBox maxHeight="+Infinity" maxWidth="+Infinity" minHeight="-Infinity" prefWidth="400.0" spacing="7.0"
+            GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <children>
+                <Label fx:id="titleLabel" text="Title" textAlignment="LEFT" wrapText="true">
+                    <font>
+                        <Font name="System Bold" size="13.0" />
+                    </font>
+                </Label>
+                <Label fx:id="detailsLabel" text="details" textAlignment="LEFT" wrapText="true">
+                    <font>
+                        <Font size="12.0" />
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+        <ProgressBar fx:id="progressBar" focusTraversable="false" maxWidth="Infinity" prefWidth="200.0"
+            GridPane.columnSpan="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+    </children>
+    <columnConstraints>
+        <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="+Infinity" minWidth="-Infinity" />
+    </columnConstraints>
+    <padding>
+        <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+    </padding>
+    <rowConstraints>
+        <RowConstraints maxHeight="Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="ALWAYS" />
+        <RowConstraints maxHeight="Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="ALWAYS" />
+        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="NEVER" />
+    </rowConstraints>
+</GridPane>
