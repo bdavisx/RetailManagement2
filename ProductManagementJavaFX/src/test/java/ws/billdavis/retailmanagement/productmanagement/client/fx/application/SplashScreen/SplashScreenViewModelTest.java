@@ -14,7 +14,8 @@ public class SplashScreenViewModelTest {
 
         viewModel.setPercentDone( 50 );
 
-        assertThat( "percent and Factor", viewModel.factorDoneProperty().get(), closeTo( 0.5, 0.001 ) );
+        assertThat( "Factor", viewModel.factorDoneProperty().get(), closeTo( 0.5, 0.001 ) );
+        assertThat( "Percent", viewModel.getPercentDone(), equalTo( 50 ) );
     }
 
 }
