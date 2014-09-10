@@ -18,4 +18,5 @@ completed. The view model will translate the values to the UI values.
 Question: Should the VM translate the values or should the controller?
 
 Question: What about the jfx concurrency library? Should it be abstracted away? 
-    Answer: Yes, it seems like it should.
+    
+    * Answer: Yes, it seems like it should.
