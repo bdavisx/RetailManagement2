@@ -42,14 +42,16 @@ public class ProductManagementApplication extends Application {
 
         Scene scene = new Scene( root );
 
+        Stage stage = new Stage( StageStyle.UTILITY );
+
         SplashScreenViewModel viewModel = new SplashScreenViewModel();
         SplashScreenUI ui = loader.getController();
         ui.initialize( viewModel );
+        viewModel.setRequestClose( ui );
         viewModel.initialize();
 
-        Stage stage = new Stage( StageStyle.UNDECORATED );
         stage.setScene( scene );
-        stage.show();
+        stage.showAndWait();
     }
 
     public static void main(String[] args) {

@@ -17,6 +17,7 @@ public class SplashScreenViewModel {
     private StringProperty title = new SimpleStringProperty();
     private StringProperty details = new SimpleStringProperty();
     private DoubleProperty factorDone = new SimpleDoubleProperty();
+    private RequestClose requestClose;
 
     public void initialize() {
         Task<ApplicationContext> task = new Task<ApplicationContext>() {
@@ -26,6 +27,7 @@ public class SplashScreenViewModel {
                     MainApplicationConfig.class, DataSourceConfig.class, DefaultDataSourceConfig.class,
                     AxonConfiguration.class } );
                 updateProgress( 1, 1 );
+                requestClose.close();
                 return applicationContext;
             }
         };
@@ -33,6 +35,8 @@ public class SplashScreenViewModel {
         factorDoneProperty().bind( task.progressProperty() );
         new Thread(task).start();
     }
+
+    public void setRequestClose( final RequestClose requestClose ) { this.requestClose = requestClose; }
 
     public int getPercentDone() { return (int) (factorDone.get() * 100); }
     DoubleProperty factorDoneProperty() { return factorDone; }

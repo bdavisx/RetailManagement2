@@ -1,5 +1,7 @@
 package org.loosefx.mvvm.viewmodels;
 
-public interface InitializableWithViewModel<TViewModel> {
+import javafx.stage.Stage;
+
+public interface InitializableWindowUI<TViewModel> {
     public void initialize( TViewModel viewModel );
 }

@@ -22,6 +22,7 @@ public class TestFX extends Application {
         SplashScreenViewModel viewModel = new SplashScreenViewModel();
         SplashScreenUI ui = loader.getController();
         ui.initialize( viewModel );
+        viewModel.setRequestClose( ui );
 
         viewModel.setDetails( "This is the description" );
         viewModel.setTitle( "This is the Title" );
