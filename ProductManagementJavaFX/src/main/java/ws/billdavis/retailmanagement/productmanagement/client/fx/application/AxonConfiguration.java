@@ -12,10 +12,14 @@ import org.axonframework.eventhandling.SimpleEventBus;
 import org.axonframework.eventhandling.annotation.AnnotationEventListenerBeanPostProcessor;
 import org.axonframework.eventstore.EventStore;
 import org.axonframework.eventstore.jdbc.DefaultEventEntryStore;
+import org.axonframework.eventstore.jdbc.EventSqlSchema;
+import org.axonframework.eventstore.jdbc.GenericEventSqlSchema;
 import org.axonframework.eventstore.jdbc.JdbcEventStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.sql.DataSource;
@@ -25,21 +29,27 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 @Configuration
+@Profile("default")
 public class AxonConfiguration {
-
     // TODO: this needs to be parameterized
     public static final int CommandRetryIntervalInMilliseconds = 500;
     public static final int NumberOfCommandRetries = 5;
     public static final int CommandThreadPoolSize = 2;
 
+    @Autowired
+    private DataSource dataSource;
+
     @Bean
     public EventStore eventStore() {
-        JdbcEventStore eventStore = new JdbcEventStore( new DefaultEventEntryStore( dataSource(), eventSqlSchema() ) );
+        JdbcEventStore eventStore = new JdbcEventStore( new DefaultEventEntryStore( dataSource, eventSqlSchema() ) );
+        return eventStore;
     }
 
     @Bean
-    public DataSource dataSource() {
-
+    public EventSqlSchema eventSqlSchema() {
+        final GenericEventSqlSchema<Object> sqlSchema = new GenericEventSqlSchema<>();
+        sqlSchema.setForceUtc( true );
+        return sqlSchema;
     }
 
     @Bean
