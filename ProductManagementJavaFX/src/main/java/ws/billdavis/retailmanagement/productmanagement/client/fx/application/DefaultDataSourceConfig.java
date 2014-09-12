@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @Profile("default")
-class DefaultDataSourceConfig implements DataSourceConfig {
+public class DefaultDataSourceConfig implements DataSourceConfig {
 
     @Value("${dataSource.driverClassName}")
     private String driver;
