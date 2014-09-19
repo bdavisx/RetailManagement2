@@ -1,6 +1,7 @@
 package ws.billdavis.retailmanagement.productmanagement.client.fx.application.SplashScreen;
 
-import javafx.beans.binding.Bindings;
+import com.google.common.base.Preconditions;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -13,30 +14,64 @@ import ws.billdavis.retailmanagement.productmanagement.client.fx.application.Dat
 import ws.billdavis.retailmanagement.productmanagement.client.fx.application.DefaultDataSourceConfig;
 import ws.billdavis.retailmanagement.productmanagement.client.fx.application.MainApplicationConfig;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class SplashScreenViewModel {
+    public static final int TimeoutAmount = 2;
+    public static final TimeUnit TimeoutUnits = TimeUnit.MINUTES;
+
     private StringProperty title = new SimpleStringProperty();
     private StringProperty details = new SimpleStringProperty();
     private DoubleProperty factorDone = new SimpleDoubleProperty();
     private RequestClose requestClose;
+    private Collection<Task> initializationTasks;
 
     public void initialize() {
-        Task<ApplicationContext> task = new Task<ApplicationContext>() {
+        Preconditions.checkNotNull( initializationTasks, "The initializationTasks can not be null." );
+
+        List<Task> tasks = new ArrayList<Task>( initializationTasks );
+        tasks.add( createWindowCloseTask() );
+
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        for( Task task : tasks ) {
+            factorDoneProperty().bind( task.progressProperty() );
+            // TODO: we need to unbind from the property when task is done...
+            // TODO: need to know when the task is done...
+
+            executorService.execute( task );
+        }
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination( TimeoutAmount, TimeoutUnits );
+        } catch( InterruptedException e ) {
+            // TODO: change default exception handling
+            e.printStackTrace();
+        }
+    }
+
+    private Task createWindowCloseTask() {
+        return new Task() {
             @Override
-            protected ApplicationContext call() throws Exception {
-                ApplicationContext applicationContext = new AnnotationConfigApplicationContext( new Class[] {
-                    MainApplicationConfig.class, DataSourceConfig.class, DefaultDataSourceConfig.class,
-                    AxonConfiguration.class } );
-                updateProgress( 1, 1 );
-                requestClose.close();
-                return applicationContext;
+            protected Object call() throws Exception {
+                Platform.runLater( () -> requestClose.close() );
+                return null;
             }
         };
-
-        factorDoneProperty().bind( task.progressProperty() );
-        new Thread(task).start();
     }
 
     public void setRequestClose( final RequestClose requestClose ) { this.requestClose = requestClose; }
+
+    /** These are the initializationTasks that the splash screen will run to initialize the application. */
+    public void setInitializationTasks( final Collection<Task> initializationTasks ) {
+        this.initializationTasks = new ArrayList<>( initializationTasks );
+    }
 
     public int getPercentDone() { return (int) (factorDone.get() * 100); }
     DoubleProperty factorDoneProperty() { return factorDone; }
@@ -48,4 +83,5 @@ public class SplashScreenViewModel {
     public String getDetails() { return details.get(); }
     StringProperty detailsProperty() { return details; }
     public void setDetails( final String details ) { this.details.set( details ); }
+
 }
