@@ -48,12 +48,6 @@ public class SplashScreenViewModel {
             executorService.execute( task );
         }
         executorService.shutdown();
-        try {
-            executorService.awaitTermination( TimeoutAmount, TimeoutUnits );
-        } catch( InterruptedException e ) {
-            // TODO: change default exception handling
-            e.printStackTrace();
-        }
     }
 
     private Task createWindowCloseTask() {

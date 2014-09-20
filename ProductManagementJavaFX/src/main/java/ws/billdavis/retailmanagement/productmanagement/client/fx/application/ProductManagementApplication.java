@@ -74,6 +74,7 @@ public class ProductManagementApplication extends Application {
                 applicationContext = new AnnotationConfigApplicationContext( new Class[] {
                     MainApplicationConfig.class, DataSourceConfig.class, DefaultDataSourceConfig.class,
                     AxonConfiguration.class } );
+                Thread.sleep( 5000 );
                 Platform.runLater( () -> { updateProgress( 1, 1 ); } );
                 return applicationContext;
             }
