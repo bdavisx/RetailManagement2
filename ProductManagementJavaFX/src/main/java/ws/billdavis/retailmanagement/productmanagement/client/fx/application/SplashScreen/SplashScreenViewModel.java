@@ -86,7 +86,6 @@ public class SplashScreenViewModel {
                     Platform.runLater( () ->
                         factorDoneProperty().bind( taskBeingStartedOptional.get().progressProperty() ) );
                 }
-                Platform.runLater( () -> requestClose.close() );
                 return null;
             }
         };
