@@ -7,25 +7,27 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ws.billdavis.retailmanagement.productmanagement.client.fx.application.AxonConfiguration;
-import ws.billdavis.retailmanagement.productmanagement.client.fx.application.DataSourceConfig;
-import ws.billdavis.retailmanagement.productmanagement.client.fx.application.DefaultDataSourceConfig;
-import ws.billdavis.retailmanagement.productmanagement.client.fx.application.MainApplicationConfig;
+import org.axonframework.domain.GenericEventMessage;
+import org.axonframework.eventhandling.EventBus;
+import org.axonframework.eventhandling.annotation.AnnotationEventListenerAdapter;
+import org.axonframework.eventhandling.annotation.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class SplashScreenViewModel {
+    private static final Logger logger = LoggerFactory.getLogger( SplashScreenViewModel.class );
+
     public static final int TimeoutAmount = 2;
     public static final TimeUnit TimeoutUnits = TimeUnit.MINUTES;
+    private final EventBus eventBus;
 
     private StringProperty title = new SimpleStringProperty();
     private StringProperty details = new SimpleStringProperty();
@@ -33,28 +35,68 @@ public class SplashScreenViewModel {
     private RequestClose requestClose;
     private Collection<Task> initializationTasks;
 
+    public SplashScreenViewModel( EventBus eventBus ) {
+        this.eventBus = eventBus;
+        // TODO: need a way to hook into Spring and auto-register (does this already exist in Axon)
+        AnnotationEventListenerAdapter adapter = new AnnotationEventListenerAdapter( this );
+        eventBus.subscribe( adapter );
+    }
+
+    @EventHandler
+    public void handle( ApplicationInitializationCompletedEvent event ) {
+        logger.debug( "Running ApplicationInitializationCompletedEvent in SplashScreenViewModel" );
+        Platform.runLater( () -> {
+            logger.debug( "Running ApplicationInitializationCompletedEvent in SplashScreenViewModel, runLater()" );
+            requestClose.close();
+        } );
+    }
+
     public void initialize() {
         Preconditions.checkNotNull( initializationTasks, "The initializationTasks can not be null." );
 
-        List<Task> tasks = new ArrayList<Task>( initializationTasks );
-        tasks.add( createWindowCloseTask() );
+        List<Task> tasks = new ArrayList<>();
 
-        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-        for( Task task : tasks ) {
-            factorDoneProperty().bind( task.progressProperty() );
-            // TODO: we need to unbind from the property when task is done...
-            // TODO: need to know when the task is done...
-
-            executorService.execute( task );
+        Task previousTask = null;
+        for( Task initializationTask : initializationTasks ) {
+            final Task progressUnbindBindTask = createProgressUnbindBindTask( Optional.ofNullable( previousTask ),
+                Optional.ofNullable( initializationTask ) );
+            tasks.add( progressUnbindBindTask );
+            previousTask = initializationTask;
+            tasks.add( initializationTask );
         }
-        executorService.shutdown();
+        tasks.add(
+            createProgressUnbindBindTask( Optional.empty(), Optional.ofNullable( previousTask ) ) );
+        tasks.add( createApplicationInitializationCompletedTask() );
+
+        Thread taskThread = new Thread( () -> { for( Task task : tasks ) { task.run(); } });
+        taskThread.setPriority( Thread.MIN_PRIORITY );
+        taskThread.start();
     }
 
-    private Task createWindowCloseTask() {
+    private Task createProgressUnbindBindTask( Optional<Task> taskBeingStoppedOptional,
+        Optional<Task> taskBeingStartedOptional ) {
         return new Task() {
             @Override
             protected Object call() throws Exception {
+                if( taskBeingStoppedOptional.isPresent() ) {
+                    logger.debug( "Unbinding {}", taskBeingStoppedOptional.get() );
+                    Platform.runLater( () -> factorDoneProperty().unbind() ); }
+                if( taskBeingStartedOptional.isPresent() ) {
+                    logger.debug( "Binding {}", taskBeingStartedOptional.get() );
+                    Platform.runLater( () ->
+                        factorDoneProperty().bind( taskBeingStartedOptional.get().progressProperty() ) );
+                }
                 Platform.runLater( () -> requestClose.close() );
+                return null;
+            }
+        };
+    }
+
+    private Task createApplicationInitializationCompletedTask() {
+        return new Task() {
+            @Override
+            protected Object call() throws Exception {
+                eventBus.publish( GenericEventMessage.asEventMessage( new ApplicationInitializationCompletedEvent() ) );
                 return null;
             }
         };

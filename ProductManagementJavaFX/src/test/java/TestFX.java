@@ -3,6 +3,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.axonframework.eventhandling.SimpleEventBus;
 import ws.billdavis.retailmanagement.productmanagement.client.fx.application.SplashScreen.SplashScreenUI;
 import ws.billdavis.retailmanagement.productmanagement.client.fx.application.SplashScreen.SplashScreenViewModel;
 
@@ -19,7 +20,7 @@ public class TestFX extends Application {
         primaryStage.setScene( scene );
         primaryStage.show();
 
-        SplashScreenViewModel viewModel = new SplashScreenViewModel();
+        SplashScreenViewModel viewModel = new SplashScreenViewModel( new SimpleEventBus() );
         SplashScreenUI ui = loader.getController();
         ui.initialize( viewModel );
         viewModel.setRequestClose( ui );

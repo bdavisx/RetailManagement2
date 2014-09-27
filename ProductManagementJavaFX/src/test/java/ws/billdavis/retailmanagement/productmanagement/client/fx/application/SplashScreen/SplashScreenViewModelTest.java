@@ -1,5 +1,6 @@
 package ws.billdavis.retailmanagement.productmanagement.client.fx.application.SplashScreen;
 
+import org.axonframework.eventhandling.SimpleEventBus;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -10,7 +11,7 @@ public class SplashScreenViewModelTest {
 
     @Test
     public void percentAndFactorDone() {
-        SplashScreenViewModel viewModel = new SplashScreenViewModel();
+        SplashScreenViewModel viewModel = new SplashScreenViewModel( new SimpleEventBus() );
 
         viewModel.setPercentDone( 50 );
 
